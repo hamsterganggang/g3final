@@ -17,6 +17,26 @@ function say(msg,kind,ms){
   clearTimeout(timer); timer=setTimeout(()=>toast.classList.remove('on'),ms||1600);
 }
 
+// 고양이 모달: 화면 가운데에 뜨는 확인창 (window.catConfirm / catAlert → Promise)
+const dlg=document.createElement('dialog'); dlg.className='cat-modal';
+dlg.innerHTML=`<img src="${IMG}" alt=""><p class="cat-modal-title"></p><p class="cat-modal-msg"></p><div class="cat-modal-btns"><button type="button" class="no">취소냥</button><button type="button" class="yes primary">확인냥</button></div>`;
+document.body.appendChild(dlg);
+let settle=null;
+const close=v=>{ if(!settle) return; const f=settle; settle=null; dlg.close(); f(v); };
+dlg.querySelector('.yes').onclick=()=>close(true);
+dlg.querySelector('.no').onclick=()=>close(false);
+dlg.addEventListener('cancel',e=>{e.preventDefault(); close(false);});          // Esc
+dlg.addEventListener('click',e=>{ if(e.target===dlg) close(false); });          // 바깥(배경) 클릭
+function modal(msg,title,two){
+  if(settle) close(false);
+  dlg.querySelector('.cat-modal-title').textContent=title;
+  dlg.querySelector('.cat-modal-msg').textContent=msg;
+  dlg.querySelector('.no').hidden=!two;
+  return new Promise(res=>{ settle=res; dlg.showModal(); dlg.querySelector(two?'.no':'.yes').focus(); });
+}
+window.catConfirm=msg=>modal(msg,'잠깐만냥!',true);
+window.catAlert=msg=>modal(msg,'알려 주겠다냥',false);
+
 // 페이지 제목 옆 고양이 (누르면 한마디)
 const h1=document.querySelector('.page-head h1');
 if(h1){

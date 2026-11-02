@@ -3,6 +3,9 @@
 // fields가 있으면 계산 문제: 숫자를 적고 확인하면 칸마다 채점하고 풀이(steps)를 보여 줍니다.
 // 셋 다 없으면 주관식: 답을 적고(선택) 정답을 확인한 뒤 스스로 맞음/틀림을 표시합니다.
 (function(){
+// 확인창: 고양이 모달(cat.js)이 있으면 그걸 쓰고, 없으면 브라우저 기본 창
+const ask=m=>window.catConfirm?catConfirm(m):Promise.resolve(confirm(m));
+const tell=m=>window.catAlert?catAlert(m):Promise.resolve(alert(m));
 const Q=window.QUIZ; if(!Q) return;
 const KEY=Q.key;
 
@@ -180,10 +183,10 @@ revBtn.onclick=()=>{
   cards.forEach(c=>setOpen(c,on));
 };
 // 틀린 문제만 안 푼 상태로 되돌림
-document.getElementById('reset-wrong').onclick=()=>{
+document.getElementById('reset-wrong').onclick=async()=>{
   const bad=cards.filter(c=>saved.marks[c.dataset.n]==='bad');
-  if(!bad.length){ alert('틀린 문제가 없어요.'); return; }
-  if(!confirm(`틀린 문제 ${bad.length}개를 안 푼 상태로 되돌릴까요?`)) return;
+  if(!bad.length){ await tell('틀린 문제가 없어요.'); return; }
+  if(!await ask(`틀린 문제 ${bad.length}개를 안 푼 상태로 되돌릴까요?`)) return;
   bad.forEach(c=>{
     const n=c.dataset.n;
     delete saved.marks[n]; delete saved.picks[n]; delete saved.calc[n]; delete saved.notes[n];
@@ -194,8 +197,8 @@ document.getElementById('reset-wrong').onclick=()=>{
   save(); tally();
   bad[0].scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'center'});
 };
-document.getElementById('reset').onclick=()=>{
-  if(!confirm('고른 보기·적은 답과 맞음/틀림 표시를 모두 지울까요?')) return;
+document.getElementById('reset').onclick=async()=>{
+  if(!await ask('고른 보기·적은 답과 맞음/틀림 표시를 모두 지울까요?')) return;
   saved={notes:{},marks:{},picks:{},calc:{}}; save();
   cards.forEach(c=>{const t=c.querySelector('textarea'); if(t) t.value=''; c.querySelectorAll('.calc-fields input').forEach(i=>i.value=''); c.classList.remove('steps-open'); setOpen(c,false); paint(c);});
   document.body.classList.remove('only-wrong');

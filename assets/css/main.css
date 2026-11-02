@@ -558,3 +558,16 @@ section>p.skip::before{content:"";position:absolute;left:12px;top:50%;width:34px
 @media (max-width:1100px){.hero-cat{position:static;flex-direction:row;margin-bottom:20px}.hero-cat img{width:96px;height:96px}.hero-cat .bubble{order:1}.hero-cat .bubble::after{left:-6px;top:50%;bottom:auto;margin:-5px 0 0;transform:rotate(135deg)}}
 @media (max-width:720px){.cat-toast{left:12px;bottom:calc(150px + env(safe-area-inset-bottom,0px))}.cat-toast img{width:64px;height:64px}.cat-peek{right:76px}}
 @media (prefers-reduced-motion:reduce){.hero-cat img,.soon-cat,.cat-toast.party img{animation:none}}
+/* 고양이 모달 (확인창) */
+.cat-modal{width:min(360px,calc(100vw - 32px));padding:28px 24px 22px;border:1px solid var(--line);border-radius:22px;background:var(--bg);color:var(--ink);box-shadow:0 24px 60px rgba(0,0,0,.25);text-align:center;margin:auto}
+.cat-modal::backdrop{background:rgba(15,15,20,.45);backdrop-filter:blur(3px)}
+.cat-modal[open]{animation:cat-pop .28s cubic-bezier(.3,1.5,.6,1)}
+.cat-modal img{display:block;width:96px;height:96px;margin:-76px auto 12px;border-radius:50%;object-fit:cover;border:4px solid var(--bg);box-shadow:var(--shadow);animation:cat-bob 3s ease-in-out infinite}
+.cat-modal-title{margin:0 0 6px;font-size:1.15rem;font-weight:800;letter-spacing:-.02em}
+.cat-modal-msg{margin:0 0 20px;color:var(--muted);font-size:.95rem;line-height:1.6;word-break:keep-all}
+.cat-modal-btns{display:flex;gap:8px}
+.cat-modal-btns button{flex:1;padding:11px 0;border-radius:12px;font-weight:700}
+.cat-modal-btns button[hidden]{display:none}
+.cat-modal{overflow:visible}
+@keyframes cat-pop{from{transform:scale(.85);opacity:0}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){.cat-modal[open],.cat-modal img{animation:none}}

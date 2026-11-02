@@ -2,6 +2,9 @@
 // 코드 문자열에서 [[n]] 자리가 빈칸, # 뒤는 주석으로 표시됩니다.
 // 기본은 보기 4개 중 고르기(객관식), '직접 입력'으로 바꾸면 손코딩처럼 직접 칩니다.
 (function(){
+// 확인창: 고양이 모달(cat.js)이 있으면 그걸 쓰고, 없으면 브라우저 기본 창
+const ask=m=>window.catConfirm?catConfirm(m):Promise.resolve(confirm(m));
+const tell=m=>window.catAlert?catAlert(m):Promise.resolve(alert(m));
 const Q=window.QUIZ; if(!Q) return;
 const A=Q.answers, S=Q.sections, KEY=Q.key;
 let MODE='pick'; try{MODE=localStorage.getItem(KEY+'-mode')||'pick'}catch(e){}
@@ -138,17 +141,17 @@ revBtn.onclick=()=>{
   revBtn.setAttribute('aria-pressed',on);
 };
 // 틀린 빈칸만 비워서 다시 풀기 (채점 전이면 먼저 채점)
-document.getElementById('reset-wrong').onclick=()=>{
+document.getElementById('reset-wrong').onclick=async()=>{
   if(!graded) grade();
   const bad=inputs.filter(i=>i.parentElement.classList.contains('bad'));
-  if(!bad.length){ alert('틀린 빈칸이 없어요.'); return; }
-  if(!confirm(`틀린 빈칸 ${bad.length}개를 비울까요?`)) return;
+  if(!bad.length){ await tell('틀린 빈칸이 없어요.'); return; }
+  if(!await ask(`틀린 빈칸 ${bad.length}개를 비울까요?`)) return;
   bad.forEach(i=>{i.value=''; delete saved[i.dataset.n]; i.parentElement.classList.remove('bad');});
   save(); progress();
   bad[0].closest('.q').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'center'});
 };
-document.getElementById('reset').onclick=()=>{
-  if(!confirm('입력한 답을 모두 지울까요?')) return;
+document.getElementById('reset').onclick=async()=>{
+  if(!await ask('입력한 답을 모두 지울까요?')) return;
   saved={}; save();
   inputs.forEach(i=>{i.value='';i.parentElement.classList.remove('ok','bad')});
   document.querySelectorAll('.q').forEach(q=>q.classList.remove('allok'));
