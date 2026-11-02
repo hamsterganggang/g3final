@@ -553,7 +553,8 @@ section>p.skip::before{content:"";position:absolute;left:12px;top:50%;width:34px
 /* 이론 끝에서 빼꼼 */
 .cat-peek{position:fixed;right:90px;bottom:-96px;z-index:14;width:84px;height:84px;border-radius:50% 50% 0 0;background:url("../img/cat.png") center 30%/cover;transition:bottom .4s cubic-bezier(.3,1.4,.6,1);pointer-events:none}
 .cat-peek.on{bottom:0}
-.cat-peek .bubble{position:absolute;bottom:96px;right:-20px}
+.cat-peek .bubble{position:absolute;bottom:96px;right:-20px;opacity:0;transition:opacity .2s}
+.cat-peek.on .bubble{opacity:1;transition-delay:.3s}
 @media (max-width:1100px){.hero-cat{position:static;flex-direction:row;margin-bottom:20px}.hero-cat img{width:96px;height:96px}.hero-cat .bubble{order:1}.hero-cat .bubble::after{left:-6px;top:50%;bottom:auto;margin:-5px 0 0;transform:rotate(135deg)}}
 @media (max-width:720px){.cat-toast{left:12px;bottom:calc(150px + env(safe-area-inset-bottom,0px))}.cat-toast img{width:64px;height:64px}.cat-peek{right:76px}}
 @media (prefers-reduced-motion:reduce){.hero-cat img,.soon-cat,.cat-toast.party img{animation:none}}

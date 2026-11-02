@@ -51,7 +51,7 @@ if(quiz){
 }
 
 // 이론 페이지: 끝까지 읽으면 빼꼼
-if(document.body.classList.contains('mode-theory')){
+if(document.body.classList.contains('mode-theory')&&!document.querySelector('.soon')){
   const peek=document.createElement('div'); peek.className='cat-peek'; peek.setAttribute('aria-hidden','true');
   peek.innerHTML='<p class="bubble">다 읽었다냥! 문제 풀러 가자냥</p>';
   document.body.appendChild(peek);
