@@ -523,3 +523,37 @@ p.dl a{font-size:.9rem;font-weight:600}
 .qa-ans.steps .fig.graph{margin:0 0 12px;padding:10px}
 .qa-ans.steps .fig.graph svg{max-width:520px;min-width:0}
 .qa-ans.steps .fig.graph figcaption{text-align:left}
+
+/* ───────── 고양이 ───────── */
+.bubble{position:relative;display:inline-block;margin:0;padding:6px 12px;border-radius:12px;background:var(--surface);border:1px solid var(--line);color:var(--ink);font-size:.85rem;font-weight:600;white-space:nowrap}
+.hero{position:relative}
+.hero-cat{position:absolute;right:-230px;top:-10px;margin:0;display:flex;flex-direction:column;align-items:center;gap:10px}
+.hero-cat img{width:150px;height:150px;border-radius:50%;object-fit:cover;border:4px solid var(--bg);box-shadow:var(--shadow);animation:cat-bob 3s ease-in-out infinite}
+.hero-cat .bubble{order:-1}
+.hero-cat .bubble::after,.cat-toast .bubble::after,.cat-peek .bubble::after{content:"";position:absolute;left:50%;bottom:-6px;width:10px;height:10px;margin-left:-5px;background:var(--surface);border-right:1px solid var(--line);border-bottom:1px solid var(--line);transform:rotate(45deg)}
+@keyframes cat-bob{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-8px) rotate(3deg)}}
+.soon-cat{display:block;width:110px;height:110px;margin:0 auto 10px;border-radius:50%;object-fit:cover;animation:cat-bob 3s ease-in-out infinite}
+.soon .bubble{margin-bottom:16px}
+/* 페이지 제목 옆 */
+.page-head h1 .head-cat{display:inline-block;width:1.2em;height:1.2em;margin-left:.3em;vertical-align:-.15em;border-radius:50%;background:url("../img/cat.png") center/cover;cursor:pointer;transition:transform .2s}
+.page-head h1 .head-cat:hover{transform:rotate(-12deg) scale(1.1)}
+/* 몰라도 되는 것: 회색 고양이 */
+section>p.skip{position:relative;padding-left:58px}
+section>p.skip::before{content:"";position:absolute;left:12px;top:50%;width:34px;height:34px;margin-top:-17px;border-radius:50%;background:url("../img/cat.png") center/cover;filter:grayscale(1);opacity:.85}
+/* 맨 위로 */
+.to-top{background:url("../img/cat.png") center/cover;border:2px solid var(--bg);width:52px;height:52px}
+.to-top span{position:absolute;top:-8px;right:-6px;width:22px;height:22px;border-radius:50%;background:var(--ink);color:var(--bg);font-size:.8rem;display:flex;align-items:center;justify-content:center}
+/* 문제 풀 때 반응 */
+.cat-toast{position:fixed;left:20px;bottom:calc(96px + env(safe-area-inset-bottom,0px));z-index:30;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;transform:translateY(140%);opacity:0;transition:transform .35s cubic-bezier(.3,1.5,.6,1),opacity .2s}
+.cat-toast.on{transform:none;opacity:1}
+.cat-toast img{width:84px;height:84px;border-radius:50%;object-fit:cover;border:3px solid var(--ok);box-shadow:var(--shadow)}
+.cat-toast.bad img{border-color:var(--bad);filter:saturate(.4);transform:rotate(-10deg)}
+.cat-toast.party img{border-color:var(--accent);animation:cat-spin .9s ease-in-out 2}
+@keyframes cat-spin{to{transform:rotate(360deg)}}
+/* 이론 끝에서 빼꼼 */
+.cat-peek{position:fixed;right:90px;bottom:-96px;z-index:14;width:84px;height:84px;border-radius:50% 50% 0 0;background:url("../img/cat.png") center 30%/cover;transition:bottom .4s cubic-bezier(.3,1.4,.6,1);pointer-events:none}
+.cat-peek.on{bottom:0}
+.cat-peek .bubble{position:absolute;bottom:96px;right:-20px}
+@media (max-width:1100px){.hero-cat{position:static;flex-direction:row;margin-bottom:20px}.hero-cat img{width:96px;height:96px}.hero-cat .bubble{order:1}.hero-cat .bubble::after{left:-6px;top:50%;bottom:auto;margin:-5px 0 0;transform:rotate(135deg)}}
+@media (max-width:720px){.cat-toast{left:12px;bottom:calc(150px + env(safe-area-inset-bottom,0px))}.cat-toast img{width:64px;height:64px}.cat-peek{right:76px}}
+@media (prefers-reduced-motion:reduce){.hero-cat img,.soon-cat,.cat-toast.party img{animation:none}}

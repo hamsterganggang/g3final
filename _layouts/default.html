@@ -82,7 +82,7 @@ try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark')document.docu
 {%- endif %}
 
 {%- if page.mode == 'theory' %}
-<a class="to-top" href="#" aria-label="맨 위로" hidden>↑</a>
+<a class="to-top" href="#" aria-label="맨 위로" hidden><span>↑</span></a>
 {%- endif %}
 
 <script>
@@ -165,5 +165,7 @@ try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark')document.docu
   }
 })();
 </script>
+<script>window.CAT_IMG="{{ '/assets/img/cat.png' | relative_url }}";</script>
+<script src="{{ '/assets/js/cat.js' | relative_url }}"></script>
 </body>
 </html>
