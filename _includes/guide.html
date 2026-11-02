@@ -1,0 +1,29 @@
+{%- comment %} "무엇을 공부해야 하나요?" 아코디언 (기본은 닫힘). 내용은 _data/<과목>/guide.yml {% endcomment -%}
+{%- assign guide = site.data[page.subject].guide -%}
+{%- if guide %}
+<details class="guide">
+  <summary>
+    <span class="q-icon" aria-hidden="true">?</span>
+    <span class="guide-title">{{ guide.title }}</span>
+    <span class="guide-note">{{ guide.note }}</span>
+    <svg class="chev" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </summary>
+  <ol class="guide-list">
+    {%- for c in guide.chapters %}
+    <li>
+      <div class="guide-ch">
+        <span class="num">{{ c.ch }}</span>
+        <h3>{{ c.title }}</h3>
+        {%- if c.tag %}<span class="tag">{{ c.tag }}</span>{% endif %}
+        {%- if c.sec %}<a class="go" href="#{{ c.sec }}">이론 보기 →</a>{% endif %}
+      </div>
+      <ul>
+        {%- for p in c.points %}
+        <li>{{ p }}</li>
+        {%- endfor %}
+      </ul>
+    </li>
+    {%- endfor %}
+  </ol>
+</details>
+{%- endif %}

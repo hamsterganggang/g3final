@@ -1,0 +1,14 @@
+title: 기말고사 대비
+description: 머신러닝 · 빅데이터 이론 정리와 문제
+lang: ko
+baseurl: "/g3final"
+url: "https://hamsterganggang.github.io"
+
+markdown: kramdown
+
+exclude:
+  - README.md
+  - Gemfile
+  - Gemfile.lock
+  - vendor
+  - scripts

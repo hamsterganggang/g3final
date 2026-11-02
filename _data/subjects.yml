@@ -1,0 +1,10 @@
+# 과목 목록. 새 과목은 여기 추가하고 <id>/theory.html, <id>/quiz.html 페이지를 만들면 됩니다.
+# ready: false 이면 "준비 중"으로 표시됩니다.
+- id: ml
+  name: 머신러닝
+  desc: 9~16장 · 강의 대본 기준 ★ 출제 / 출제 예상 / 용어 이해 표시 · 계산 풀이 · 객관식 예상 문제 + 계산 문제
+  ready: true
+- id: bigdata
+  name: 빅데이터
+  desc: 자료가 들어오면 추가합니다
+  ready: false

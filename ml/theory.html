@@ -1,0 +1,564 @@
+---
+layout: theory
+subject: ml
+mode: theory
+permalink: /ml/theory/
+---
+<!-- 근거: scripts/Chapter9~16.txt (강의 대본). 기말은 아직 교수님 시험 문제 정리본이 없어 강의에서 한 말만으로 표시했습니다.
+     data-k 표시: m = ★ 출제(강의에서 "시험에 나올 수 있다 · 알아두십시오 · 기억해 두라 · 이번 장에서 중요한 것은"이라고 직접 말한 것),
+     e = 출제 예상(강의에서 설명·강조했거나 직접 짚어 준 예제·숫자), x = 참고(이해를 돕는 설명·예시, 따로 출제되지 않음).
+     data-term = 용어 이해(강의에서 용어·이름을 알아두라고 한 것). data-k와 함께 붙습니다.
+     <dfn>으로 감싼 용어는 맨 아래 '용어 사전'에 자동으로 모입니다. 그림은 _includes/ml/fig/*.svg (생성 스크립트로 만든 것) -->
+<p class="intro"><b>9~16장 강의 대본</b>을 기준으로 정리했습니다. 기말은 아직 교수님 <b>시험 문제 정리본</b>이 없어서, 강의에서 <b>“시험에 나올 수 있다 · 알아두십시오 · 기억해 두라 · 이번 장에서 중요한 것은”</b>이라고 직접 말한 것을 <b>★ 출제</b>로 표시했습니다. 교수님이 <b>몰라도 된다 · 가볍게 · 크게 중요하지 않다</b>고 한 것은 본문에서 빼고 장 끝 <b>몰라도 되는 것</b>에 적어 두었습니다.</p>
+
+<div class="lens" role="toolbar" aria-label="보기 필터">
+  <span class="lens-label">보기</span>
+  <button type="button" data-lens="all" aria-pressed="true">전체</button>
+  <button type="button" data-lens="m"><span class="star">★</span> 출제만</button>
+  <button type="button" data-lens="me"><span class="star">★</span> + 출제 예상</button>
+  <button type="button" data-lens="t">용어 이해만</button>
+</div>
+
+<section id="s0">
+<h2>시험 범위 한눈에 보기</h2>
+<div class="card">
+<dl class="legend-list">
+  <div><dt><span class="chip m">★ 출제</span></dt><dd>강의에서 <b>“시험 나올 수 있으니까 · 알아두십시오 · 기억해 두시면 · 이번 장에서 중요한 것은”</b>이라고 직접 말한 것</dd></div>
+  <div><dt><span class="chip e">출제 예상</span></dt><dd>강의에서 설명하며 강조했거나, 직접 짚어 준 예제·숫자 (데이터 개수, 정확도, 가중치 개수 등)</dd></div>
+  <div><dt><span class="chip t">용어 이해</span></dt><dd>용어와 뜻을 그대로 알아 둘 것 (항목 끝에 붙음)</dd></div>
+  <div><dt><span class="chip x">참고</span></dt><dd>위 내용을 이해하려고 넣은 설명·예시·코드. 따로 출제되지 않음 (용어는 맨 아래 <a href="#glossary">용어 사전</a>에도 모아 둠)</dd></div>
+</dl>
+<div class="tbl"><table>
+<tr><th>장</th><th><span class="star">★</span> 강의에서 꼭 알아 두라고 한 것</th><th>계산</th></tr>
+<tr><td><a href="#s9">9장</a></td><td>오차 역전파 <b>개념</b>(계산 X) · 기울기 소실 · 활성화 함수 4가지 · 고급 경사하강법 표(모멘텀 · 아다그라드 · RMSProp · 아담) · 활성화 함수 = 렐루, 옵티마이저 = 아담</td><td>○</td></tr>
+<tr><td><a href="#s10">10장</a></td><td>모델 정의 → 컴파일 → 학습(fit) · 손실 함수 3가지(이항 = binary_crossentropy, 다항 = categorical_crossentropy, 평균 제곱 오차) · 에포크 · 배치 사이즈</td><td>○</td></tr>
+<tr><td><a href="#s11">11장</a></td><td>좋은 데이터 = 양 + 질 · <b>데이터 전처리가 가장 중요</b> · 상관관계로 필요한 속성만 고르기 · 결측치·이상치 → 평균·중앙값 대체 또는 제거</td><td>○</td></tr>
+<tr><td><a href="#s12">12장</a></td><td>다중 분류 · 원-핫 인코딩 · 소프트맥스(합 = 1) · categorical_crossentropy</td><td>○</td></tr>
+<tr><td><a href="#s13">13장</a></td><td>과적합(오버피팅) · 학습셋 / 테스트셋 분리 · 과적합 그래프 · K겹 교차 검증</td><td>○</td></tr>
+<tr><td><a href="#s14">14장</a></td><td>검증셋(학습 : 검증 : 테스트 = 6 : 2 : 2) · 에포크가 많으면 과적합 · 검증셋 오차가 커지기 직전이 최적</td><td>○</td></tr>
+<tr><td><a href="#s15">15장</a></td><td><b>결측치와 이상치</b> · <code>isnull</code> · <code>fillna</code> · <code>dropna</code>로 처리 판단 · 수치 예측(회귀)은 평균 제곱 오차</td><td>○</td></tr>
+<tr><td><a href="#s16">16장</a></td><td>CNN: <b>커널(필터)</b> · 특징 맵 · <b>맥스 풀링</b> · <b>드롭아웃</b> · <b>플래튼</b></td><td>○</td></tr>
+</table></div>
+<p class="note">계산: ○ 강의에서 직접 계산하거나 숫자를 짚어 준 것. 풀이는 <a href="#calc">계산 문제 풀이</a>에 모았고, 숫자를 바꾼 연습 문제는 <b>문제</b> 메뉴에 있습니다. 정리본이 나오면 표시를 다시 맞출 예정입니다.</p>
+</div>
+</section>
+
+<section id="s9">
+<h2>9장. 신경망에서 딥러닝으로</h2>
+<p class="scope"><span>강의 핵심</span>오차 역전파는 개념만 · 기울기 소실 · 활성화 함수 4가지(“시험 나올 수 있으니까”) · 고급 경사하강법(“이거는 알아두십시오”) · 렐루 + 아담</p>
+<div class="card">
+<h3>오차 역전파: 은닉층의 가중치를 고치는 방법</h3>
+<ul>
+<li data-k="e">다층 퍼셉트론으로 XOR은 풀었지만, 가중치·바이어스를 사람이 미리 정해 준 것 → 모델링이라 할 수 없음. <b>컴퓨터가 데이터로 스스로 가중치를 조정</b>해야 함</li>
+<li data-k="e">문제: <b>은닉층의 가중치를 업데이트할 방법이 없었음</b> → 인공지능의 겨울 → 힌튼 교수의 <b>오차 역전파</b>로 해결 → 딥러닝의 시작</li>
+<li data-k="m" data-term><dfn>순전파</dfn> = 입력층 → 출력층으로 순서대로 계산 (폭포가 위에서 아래로) / <dfn>역전파</dfn> = 출력의 오차를 거꾸로 거슬러 올라가며(연어) 각 층의 가중치를 수정</li>
+<li data-k="m" data-term><dfn>오차 역전파</dfn> = 출력에서 구한 오차를 입력층 쪽으로 보내며 <b>경사하강법</b>으로 가중치를 고치는 방법. 단일 퍼셉트론은 경사하강법 한 번이면 되지만, 은닉층이 생기면 <b>두 번(층마다) 경사하강법</b>을 해야 함</li>
+<li data-k="e">과정: ① 가중치 초깃값을 정함 → ② 순전파로 출력값 계산 → ③ 실제값과 비교해 오차 계산 → ④ 오차가 줄도록 출력층 → 은닉층 순으로 가중치 수정(역전파 1, 역전파 2) → 반복</li>
+<li data-k="x">은닉층은 겉으로 드러나지 않아 “정답(실제값)”이 없음 → 출력층의 오차를 이용해 편미분으로 계산 (계산법은 몰라도 됨)</li>
+<li data-k="x"><dfn>경사하강법</dfn>(5장 복습) = 임의의 가중치로 오차를 구한 뒤, 기울기의 반대 방향으로 조금씩 이동해 <b>오차가 최소(기울기 0)</b>인 곳을 찾는 방법</li>
+</ul>
+<p class="said"><span>강의 2:17</span>“실제로 저희는 계산 방법까지는 몰라도 된다. 오차 역전파의 개념이 뭐던지” · <span>2:35</span>“개념 정도만 익히고 넘어가는 것을 목적으로 합니다”</p>
+<figure class="fig">{% include ml/fig/backprop.svg %}<figcaption>순전파(입력 → 출력)와 역전파(출력의 오차 → 입력층 쪽)</figcaption></figure>
+</div>
+<div class="card">
+<h3>기울기 소실 문제</h3>
+<ul>
+<li data-k="m" data-term><dfn>기울기 소실</dfn> = 층을 깊게 쌓으면 역전파가 진행될수록 기울기가 점점 0에 가까워져, 출력층에서 시작한 가중치 업데이트가 <b>처음 층까지 전달되지 않는</b> 현상 (사람으로 치면 “치매”)</li>
+<li data-k="m">원인 = 활성화 함수로 쓴 <b>시그모이드</b>. 시그모이드를 미분하면 <b>최댓값이 0.25</b> → 층을 지날 때마다 25% 이하만 남아 곱할수록 0에 가까워짐 → <a href="#calc5">풀이 ⑤</a></li>
+<li data-k="e">은닉층을 두껍게 쌓으면 정확도가 오를 것 같지만, 너무 깊으면 기울기 소실 + 비용 증가 → <b>적절한 은닉층 개수</b>가 필요 (정수기 필터 100층에서는 물이 안 나옴)</li>
+</ul>
+<p class="said"><span>강의 9:11</span>“학습을 더 이상 할 수 없는 기울기 소실 문제 발생해요. 요거는 알아두시면 좋고” · <span>9:35</span>“시그모이드 함수를 미분하면 최대치는 0.25기 때문에”</p>
+<figure class="fig">{% include ml/fig/vanish.svg %}<figcaption>시그모이드의 미분은 가장 커도 0.25, 렐루의 미분은 x &gt; 0이면 1</figcaption></figure>
+</div>
+<div class="card">
+<h3>활성화 함수 4가지</h3>
+<div class="tbl"><table>
+<tr><th>활성화 함수</th><th>특징</th></tr>
+<tr><td><dfn>시그모이드</dfn></td><td>S자, 값 0 ~ 1. 미분 최댓값 0.25 → 기울기 소실의 원인. 지금은 <b>이진 분류의 출력층</b>에 씀</td></tr>
+<tr><td><dfn>하이퍼볼릭 탄젠트</dfn> (tanh)</td><td>시그모이드를 −1 ~ 1로 넓힌 S자. 그래도 미분값이 1보다 작아 기울기 소실이 남음</td></tr>
+<tr><td><dfn>렐루</dfn> (ReLU)</td><td><b>x &lt; 0 → 0, x &gt; 0 → x 그대로</b>. x &gt; 0이면 미분값이 1 → 입력 대비 출력이 보장되어 첫 층까지 전달. <b>가장 많이 씀</b></td></tr>
+<tr><td><dfn>소프트플러스</dfn></td><td>렐루의 0이 되는 부분을 부드럽게 완화한 함수</td></tr>
+</table></div>
+<ul>
+<li data-k="m" data-term>활성화 함수 4가지 이름과 특징: <b>시그모이드, 하이퍼볼릭 탄젠트, 렐루, 소프트플러스</b></li>
+<li data-k="m">렐루가 기울기 소실을 100% 해결한 것은 아니지만, x가 0보다 크면 미분값이 1이라 오차 역전파가 여러 층을 지나도 <b>맨 처음 층까지</b> 갈 수 있음 → 대부분의 딥러닝 은닉층에 렐루를 씀</li>
+<li data-k="e">렐루의 약점: 입력이 0보다 작으면 모두 0으로 리셋 (하지만 그런 경우가 드물어 보편적으로 사용)</li>
+<li data-k="x">학습 = 오차를 최소화하는 가중치를 찾는 과정 → 역전파로 입력층까지 고칠 수 있게 되면서 <b>깊은 층</b>을 쌓을 수 있게 됨</li>
+</ul>
+<p class="said"><span>강의 11:12</span>“보편적으로 사용되는 함수는 뭐다? 렐루 함수들. 요거는 네 가지는 알아두시길 바랍니다. 시험 나올 수 있으니까”</p>
+<figure class="fig">{% include ml/fig/act4.svg %}<figcaption>시그모이드 · 하이퍼볼릭 탄젠트 · 렐루 · 소프트플러스 (x는 −5 ~ 5)</figcaption></figure>
+</div>
+<div class="card">
+<h3>고급 경사하강법 (옵티마이저)</h3>
+<ul>
+<li data-k="e">일반 경사하강법은 정확하지만 <b>계산량이 매우 많음</b>(전체 데이터를 매번 씀) → 데이터가 많을수록 시간이 오래 걸리고, 최솟값이 아닌 곳에서 멈출 수도 있음 → 고급 경사하강법 등장</li>
+</ul>
+<div class="tbl"><table>
+<tr><th>방법</th><th>개요</th><th>개선</th></tr>
+<tr><td><dfn>확률적 경사하강법</dfn> (SGD)</td><td>전체가 아니라 <b>랜덤하게 뽑은 일부 데이터</b>로 더 자주 업데이트. 중간 결과가 출렁이지만(불안정) 빠르고 최적 근삿값을 찾음</td><td>속도</td></tr>
+<tr><td><dfn>모멘텀</dfn></td><td>경사에 <b>관성(탄력)</b>을 더함. 바로 앞 수정 방향을 참고해 같은 방향으로 일정 비율만 수정 → 지그재그 진동이 줄고 완만하게</td><td>정확도(방향)</td></tr>
+<tr><td>네스테로프 모멘텀</td><td>모멘텀이 이동할 방향으로 미리 가서 기울기를 계산 → 불필요한 이동 줄임</td><td>정확도(방향)</td></tr>
+<tr><td><dfn>아다그라드</dfn> (Adagrad)</td><td>자주 업데이트되는 변수는 학습률을 작게 → 보폭 조절</td><td>보폭</td></tr>
+<tr><td><dfn>RMSProp</dfn></td><td>아다그라드의 보폭 민감도를 보완</td><td>보폭</td></tr>
+<tr><td><dfn>아담</dfn> (Adam)</td><td><b>모멘텀 + RMSProp</b>을 합침 → 두 마리 토끼(정확도와 보폭)를 동시에. <b>가장 많이 씀</b></td><td>정확도 + 보폭</td></tr>
+</table></div>
+<ul>
+<li data-k="m" data-term>고급 경사하강법 표: <b>방향</b>을 고치는 것 = 모멘텀 계열, <b>보폭</b>을 고치는 것 = 아다그라드 · RMSProp, 둘 다 = <b>아담</b></li>
+<li data-k="m"><b>아담 = 모멘텀 + RMSProp</b> (“제일 중요한”). 아다그라드 · RMSProp은 빅데이터·인공지능 자격증 시험에 자주 나옴</li>
+<li data-k="m" data-term><dfn>옵티마이저</dfn> = 오차를 최소화하는 경사하강법(최적화 방법)을 딥러닝에서 부르는 말 → 코드의 <code>optimizer='adam'</code> / 활성화 함수는 <code>activation='relu'</code></li>
+<li data-k="m">정리: <b>활성화 함수 = 렐루, 옵티마이저 = 아담</b>을 가장 많이 씀 (뒤 장 코드에 계속 나옴)</li>
+</ul>
+<p class="said"><span>강의 16:49</span>“경사하강법은 다음과 같이 나와야돼. 이거는 알아두십시오” · <span>17:04</span>“아다그라드, RMSProp 시험에 자주 나오는 거” · <span>17:20</span>“모멘텀과 RMSProp을 합쳐서 두 마리 토끼를 동시에 잡으려고 한게 아담” · <span>17:42</span>“활성 함수로는 렐루라는게 많이 쓰이고요. 옵티마이저는 아담이라는게 많이 씁니다”</p>
+</div>
+<p class="skip"><b>몰라도 되는 것</b> <b>오차 역전파 계산법</b>(델타식·편미분 계산, “계산 방법까지는 몰라도 된다”), 모멘텀 등 각 방법의 자세한 설명(“이걸 다 외우실 필요는 없고” → 표의 이름·개선점만), 케라스 옵티마이저 인자값</p>
+</section>
+
+<section id="s10">
+<h2>10장. 딥러닝 모델 설계하기</h2>
+<p class="scope"><span>강의 핵심</span>모델 정의 → 컴파일 → 학습 · 손실 함수(“두 가지 세 가지 정도만 일단 기억”) · 에포크 · 배치 사이즈(하이퍼파라미터)</p>
+<div class="card">
+<h3>딥러닝 모델 만드는 순서</h3>
+<ul>
+<li data-k="m"><b>모델 정의</b>(구조 설계: 입력 → 은닉 → 출력 층과 노드 수) → <b>컴파일</b>(손실 함수 · 옵티마이저 · 평가 기준 설정) → <b>학습</b>(<code>fit</code>)</li>
+<li data-k="x">텐서플로를 더 쉽게 쓰려고 나온 것이 케라스. <code>Sequential</code>로 모델을 만들고 <code>Dense</code>로 층을 쌓음</li>
+<li data-k="e">폐암 수술 환자 데이터: 환자 <b>470명</b>, 속성 <b>16개</b>(0 ~ 15번 열 = X) + 클래스 1개(16번 열 = y, 생존 1 / 사망 0)</li>
+<li data-k="e">구조: 입력 16 → 은닉층 노드 30(렐루) → 출력 1(시그모이드, 생존/사망 둘 중 하나) → 가중치·바이어스 <b>541개</b> → <a href="#calc1">풀이 ①</a></li>
+</ul>
+<pre class="code"><code>model = Sequential()
+model.add(Dense(30, input_dim=16, activation='relu'))   # 입력 16 → 은닉 30
+model.add(Dense(1, activation='sigmoid'))                # 출력 1 (이진 분류)
+model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+history = model.fit(X, y, epochs=5, batch_size=16)</code></pre>
+</div>
+<div class="card">
+<h3>손실 함수(오차 함수)</h3>
+<div class="tbl"><table>
+<tr><th>문제</th><th>출력층 활성화</th><th>손실 함수(loss)</th></tr>
+<tr><td>이항 분류 (둘 중 하나: 생존/사망)</td><td>시그모이드</td><td><code>binary_crossentropy</code></td></tr>
+<tr><td>다항 분류 (셋 이상 중 하나: 붓꽃 품종)</td><td>소프트맥스</td><td><code>categorical_crossentropy</code></td></tr>
+<tr><td>수치 예측 (회귀: 집값)</td><td>없음(값 그대로)</td><td><code>mean_squared_error</code> (평균 제곱 오차)</td></tr>
+</table></div>
+<ul>
+<li data-k="m" data-term><dfn>손실 함수</dfn> = 예측과 실제의 차이(오차)를 계산하는 함수. <b>이항 분류 → 바이너리 크로스 엔트로피, 다항 분류 → 카테고리컬 크로스 엔트로피</b>, 수치 예측 → <b>평균 제곱 오차(MSE)</b></li>
+<li data-k="e">옵티마이저는 <b>아담</b>(모멘텀 + RMSProp), 평가 기준은 정확도 <code>metrics=['accuracy']</code></li>
+<li data-k="x">출력에 나오는 <code>loss</code> = 손실값, <code>accuracy</code> = 정확도, <code>val_</code>로 시작하면 검증셋 기준 (14장)</li>
+</ul>
+<p class="said"><span>강의 5:30</span>“이항 분류는 보통 바이너리 크로스 엔트로피, 다항 분류 … 세 가지 이상 분류할 때는 카테고리컬 크로스엔트로피를 보통 로스 함수로 많이 사용한다라는 거 알고 계시면 되고” · <span>5:55</span>“두 가지 세 가지 정도만 일단 기억을 해 두시면 좋을 것 같아요”</p>
+</div>
+<div class="card">
+<h3>에포크와 배치 사이즈</h3>
+<ul>
+<li data-k="m" data-term><dfn>에포크</dfn>(epochs) = 전체 데이터를 <b>몇 번 반복해서 학습</b>할지 (책 전체를 몇 번 독파했는지) / <dfn>배치 사이즈</dfn>(batch_size) = 한 번에 <b>몇 개씩 끊어서</b> 학습할지 (하루 공부량)</li>
+<li data-k="e">폐암 예제: 470개 샘플을 <b>16개씩</b> 끊어서, 전체를 <b>5번</b> 반복 → <a href="#calc6">풀이 ⑥</a></li>
+<li data-k="m">배치 사이즈가 <b>너무 크면 속도가 느려지고</b>, <b>너무 작으면 편차가 생겨 결과가 불안정</b></li>
+<li data-k="e" data-term><dfn>하이퍼파라미터</dfn> = 사용자가 직접 정하는 값. 에포크 · 배치 사이즈 · 은닉층 수 · 노드 수 등</li>
+</ul>
+<p class="said"><span>강의 7:08</span>“하루 공부량 배치 사이즈고요. 이 전체를 몇 번 독파했는지 독파의 수가 에포크가 된다” · <span>7:36</span>“배치 사이즈도 사용자가 다루는 하이퍼 파라미터 중 하나다라고 알아두시면 좋을 것 같아요”</p>
+</div>
+<p class="skip"><b>몰라도 되는 것</b> 2장에서 했던 폐암 예제 설명 반복 부분(“앞에서 설명드렸기 때문에 넘어가도록”), 출력 로그 읽는 법</p>
+</section>
+
+<section id="s11">
+<h2>11장. 데이터 다루기 (피마 인디언 당뇨병)</h2>
+<p class="scope"><span>강의 핵심</span>“이 챕터에서 중요하게 생각하는 부분은 가져온 데이터를 전처리하는 것이 매우 중요하다” · 연관성 높은 속성 고르기 · 이상치·결측치는 평균 또는 중앙값으로 대체</p>
+<div class="card">
+<h3>좋은 데이터와 전처리</h3>
+<ul>
+<li data-k="e" data-term><dfn>빅데이터</dfn> = 오랜 시간 쌓인 방대한 데이터. 하지만 양이 많다고 무조건 좋은 결과가 나오는 것은 아님</li>
+<li data-k="m">좋은 데이터 = <b>양</b> + <b>질</b>을 모두 갖춘 데이터. 한쪽으로 치우치지 않고, 불필요한 정보가 대량으로 들어 있지 않으며, 왜곡되지 않은 데이터</li>
+<li data-k="m" data-term><dfn>전처리</dfn> = 모은 데이터를 머신러닝·딥러닝에 쓸 수 있게 <b>정제된 형식으로 가공</b>하는 것 (사금 채취: 모래를 많이 퍼서 사금만 걸러 냄). 모든 프로젝트의 <b>첫 단추이자 가장 중요한 작업</b></li>
+<li data-k="x">데이터 분석에 쓰는 파이썬 라이브러리: <dfn>판다스</dfn>(데이터 프레임 = 데이터베이스 테이블 같은 표) · <dfn>맷플롯립</dfn>·<dfn>시본</dfn>(그래프)</li>
+</ul>
+<p class="said"><span>강의 3:08</span>“이 작업은 모든 머신 러닝 딥러닝 프로젝트의 첫 단추이자 가장 중요한 작업이더라” · <span>24:45</span>“이 챕터에서 중요하게 생각하는 부분은 뭐다? 가져온 데이터를 전처리하는 것이 매우 중요하다”</p>
+</div>
+<div class="card">
+<h3>피마 인디언 데이터 살펴보기</h3>
+<ul>
+<li data-k="x">피마 인디언: 1950년대까지 비만이 없었는데, 영양분을 잘 저장하는 체질에 패스트푸드가 더해져 지금은 <b>60% 당뇨, 80% 비만</b> → 비만은 유전 + 환경 모두의 탓</li>
+<li data-k="e"><b>768명</b>, 속성 <b>8개</b>(임신 횟수, 포도당(plasma), 혈압, 피부 두께, 인슐린, BMI, 당뇨 가족력, 나이) + 클래스 1개(당뇨 1 / 정상 0) → 정답이 있는 <b>지도 학습</b></li>
+<li data-k="e">정상 <b>500명</b>, 당뇨 <b>268명</b> (합 768)</li>
+<li data-k="e"><code>pd.read_csv()</code>로 읽어 데이터 프레임에 저장, <code>df.head()</code> = 위에서 <b>5줄</b> 보기, <code>df.describe()</code> = 개수(count) · 평균(mean) · 표준편차(std) · 최솟값 · 25/50/75% · 최댓값</li>
+<li data-k="x"><code>X = df.iloc[:, 0:8]</code> (속성 8개), <code>y = df.iloc[:, 8]</code> (클래스)</li>
+</ul>
+</div>
+<div class="card">
+<h3>상관관계로 중요한 속성 고르기</h3>
+<ul>
+<li data-k="e" data-term><dfn>상관관계</dfn> = 두 속성이 함께 변하는 정도. 절댓값 0 ~ 1, 1에 가까울수록 관계가 깊음 (음수 = 음의 상관관계). <code>df.corr()</code>로 구하고 <dfn>히트맵</dfn>(색이 밝을수록 관계가 깊음)으로 그림</li>
+<li data-k="e">당뇨와 상관관계가 높은 속성 = <b>plasma(공복 혈당 농도)</b>와 <b>BMI(체질량 지수)</b> → 히스토그램으로 봐도 수치가 높을수록 당뇨가 많음</li>
+<li data-k="m">속성이 50개, 100개로 늘면 불필요한 속성 때문에 <b>학습 효율이 떨어짐</b> → 상관관계를 보고 <b>관계없는 속성을 빼면</b> 적은 데이터로 비슷한 정확도 = 효율이 높음 (시험 범위가 아닌 부분은 공부할 필요 없음)</li>
+<li data-k="m" data-term><dfn>결측치</dfn> = 빠진 값(키는 있는데 몸무게가 없음) / <dfn>이상치</dfn> = 잘못 들어간 튀는 값(몸무게 1톤) → <b>평균이나 중앙값으로 대체</b>하거나 <b>제거</b> (모두 전처리)</li>
+<li data-k="x">서포트 벡터 머신·랜덤 포레스트 같은 일반 머신러닝에서도 전처리가 성능에 큰 역할</li>
+</ul>
+<p class="said"><span>강의 14:22</span>“데이터들의 상관 관계를 유추해 보고 생략함으로써 조금 더 효과적인 학습이 되도록 할 수 있다라는게 이 예제가 궁극적으로 말하고자 하는 바” · <span>25:10</span>“이상치나 결측 빠진 부분이 있다면 평균 또는 중앙값으로 대체를 하는 방식을 쓴다”</p>
+</div>
+<div class="card">
+<h3>모델 구조와 은닉층 개수</h3>
+<pre class="code"><code>model = Sequential()
+model.add(Dense(12, input_dim=8, activation='relu'))   # 은닉층 1
+model.add(Dense(8, activation='relu'))                 # 은닉층 2
+model.add(Dense(1, activation='sigmoid'))              # 출력 (당뇨 / 정상)
+model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+history = model.fit(X, y, epochs=100, batch_size=5)</code></pre>
+<ul>
+<li data-k="e">입력 8 → 은닉 12 → 은닉 8 → 출력 1. 가중치·바이어스 108 + 104 + 9 = <b>221개</b> → <a href="#calc2">풀이 ②</a></li>
+<li data-k="e">가중치 개수 = 앞 층 노드 × 뒤 층 노드 + <b>바이어스(뒤 층 노드 수)</b></li>
+<li data-k="e">은닉층을 몇 층, 노드를 몇 개로 할지는 <b>정답이 없음</b> → 프로젝트에 맞게 여러 번 반복하며 찾음. 늘리면 정확도가 오를 수 있지만 기울기 소실·비용 증가 (98.9% → 99%를 위해 비용이 두 배)</li>
+<li data-k="x">에포크 100, 배치 5 → 정확도 약 71.6% (강의 화면). 은닉층·노드를 바꾸면 오를 수도 떨어질 수도 있음</li>
+</ul>
+<p class="said"><span>강의 21:39</span>“은닉층은 몇 층으로 할지 노드는 몇 개로 할지에 대한 정답은 없더라. 자신의 프로젝트에 따라 설정해야 하며”</p>
+</div>
+<p class="skip"><b>몰라도 되는 것</b> <code>value_counts</code> 등 함수 이름 외우기(“굳이 다 외우실 필요는 없습니다”), 피마 데이터 속성의 의학·생리학 배경 지식, 히트맵·히스토그램 그리는 코드 세부</p>
+</section>
+
+<section id="s12">
+<h2>12장. 다중 분류 문제 해결하기 (아이리스)</h2>
+<p class="scope"><span>강의 핵심</span>다중 분류 · 원-핫 인코딩 · 소프트맥스(합이 1) · 카테고리컬 크로스 엔트로피</p>
+<div class="card">
+<h3>다중 분류와 아이리스 데이터</h3>
+<ul>
+<li data-k="m" data-term><dfn>다중 분류</dfn> = 여러 개의 답 중 하나를 고르는 분류 (숫자·글자 맞히기, 품종 맞히기) / <dfn>이항 분류</dfn> = 둘 중 하나(O/X)를 고르는 분류 → 접근 방식이 다름</li>
+<li data-k="e">아이리스(붓꽃) 데이터: <b>150개</b>, 속성 <b>4개</b>(꽃받침 길이·너비, 꽃잎 길이·너비) + 클래스 <b>3개 품종</b>(세토사, 버지컬러, 버지니카)</li>
+<li data-k="x"><code>sns.pairplot(df, hue='species')</code> = 속성끼리 짝지어 분포를 한눈에 봄. <code>hue</code> = 어떤 카테고리(품종)를 기준으로 색을 나눌지. 대각선 = 해당 속성 하나의 분포</li>
+<li data-k="x">species 열은 문자열(object 타입) → 계산하려면 숫자로 바꿔야 함</li>
+</ul>
+</div>
+<div class="card">
+<h3>원-핫 인코딩</h3>
+<ul>
+<li data-k="m" data-term><dfn>원-핫 인코딩</dfn> = 여러 개의 값으로 된 <b>문자열을 0과 1로만 이루어진 형태</b>로 바꾸는 것. 클래스 이름마다 열을 만들고, 자기 이름이면 1 나머지는 0</li>
+<li data-k="e">예: A → [1, 0, 0], B → [0, 1, 0], C → [0, 0, 1]. 판다스 <code>pd.get_dummies(y)</code>로 처리</li>
+<li data-k="e">열이 늘어나 데이터가 커 보이지만(속성 4 + 클래스 3 = 7열 × 150행) <b>학습에는 유리</b>. 실제로 열이 100 ~ 200개씩 늘기도 함</li>
+<li data-k="e">학습에 유리한 순서: 문자 &lt; 숫자, 숫자 중에서도 정수보다 <b>0과 1 사이의 실수</b>가 유리</li>
+</ul>
+<p class="said"><span>강의 6:41</span>“문자보다 숫자가 유리하고요. 숫자 중에서도 정수 타입보다는 0과 1 사이의 실수 타입이 조금 더 학습에 유리하다” · <span>8:51</span>“여러 개의 값으로 된 문자열을 0과 1로만 이루어진 형태로 만들어 주는 과정을 원핫 인코딩이라 하고요”</p>
+</div>
+<div class="card">
+<h3>소프트맥스와 카테고리컬 크로스 엔트로피</h3>
+<ul>
+<li data-k="m" data-term><dfn>소프트맥스</dfn> = 다중 분류의 <b>출력층</b>에 쓰는 활성화 함수. 각 클래스일 확률을 내고, <b>모두 더하면 1</b> (예: A 0.1, B 0.3, C 0.6 → C일 확률이 가장 높음) → <a href="#calc7">풀이 ⑦</a></li>
+<li data-k="m">이항 분류는 출력 1개(시그모이드, 0.5 이상이면 1), 다중 분류는 <b>출력 노드 = 클래스 수</b>(소프트맥스) + 손실 함수 <code>categorical_crossentropy</code></li>
+<li data-k="e">구조: 입력 4 → 은닉 12 → 은닉 8 → 출력 <b>3</b>(소프트맥스). 에포크 50, 배치 5 → 정확도 약 <b>96%</b>(150개 중 144개) → <a href="#calc3">풀이 ③</a></li>
+</ul>
+<pre class="code"><code>y = pd.get_dummies(y)                                  # 원-핫 인코딩
+model = Sequential()
+model.add(Dense(12, input_dim=4, activation='relu'))
+model.add(Dense(8, activation='relu'))
+model.add(Dense(3, activation='softmax'))              # 출력 노드 3 = 품종 3개
+model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+history = model.fit(X, y, epochs=50, batch_size=5)</code></pre>
+<p class="said"><span>강의 10:01</span>“다중 분류가 되면요. 보편적으로 많이 쓰는 활성 함수가 소프트맥스 함수입니다” · <span>10:32</span>“항목들을 다 더했을 때 소프트맥스 함수는 1에 수렴합니다”</p>
+</div>
+<p class="skip"><b>몰라도 되는 것</b> 페어플롯 그래프 읽는 세부, 아이리스 꽃 설명</p>
+</section>
+
+<section id="s13">
+<h2>13장. 모델 성능 검증하기 (초음파 광물)</h2>
+<p class="scope"><span>강의 핵심</span>과적합 · 학습셋과 테스트셋 나누기 · 과적합 그래프(테스트셋 오차가 다시 커짐) · K겹 교차 검증</p>
+<div class="card">
+<h3>초음파 광물 데이터와 100% 정확도</h3>
+<ul>
+<li data-k="x">1986년 힌튼의 오차 역전파 발표 후, 세즈노프스키 교수가 은닉층 가중치가 실제로 업데이트되는지 확인하려고 광석과 일반 암석에 음파 탐지기를 쏴서 만든 데이터</li>
+<li data-k="e"><b>208개</b> 샘플, 속성 <b>60개</b> + 클래스 1개(광석 1 / 일반 암석 0) = 61열</li>
+<li data-k="e">구조: 입력 60 → 은닉 24 → 은닉 10 → 출력 1(시그모이드, <code>binary_crossentropy</code>). 에포크 200, 배치 10 → 정확도 <b>100%</b></li>
+<li data-k="e">학습한 데이터로 그대로 시험을 쳤기 때문 (공부한 문제로 시험 → 성적이 높을 수밖에 없음) → 정말 어떤 광물이든 100% 맞히는 모델일까?</li>
+</ul>
+</div>
+<div class="card">
+<h3>과적합</h3>
+<ul>
+<li data-k="m" data-term><dfn>과적합</dfn>(오버피팅) = 모델이 <b>학습 데이터셋 안에서는</b> 높은 정확도를 보이지만 <b>새로운 데이터에는 잘 맞지 않는</b> 것. 주어진 샘플에만 너무 최적화된 상태 (하늘은 파랗다고만 배운 사람이 노을을 보고 “하늘이 아니다”라고 함)</li>
+<li data-k="e" data-term><dfn>언더피팅</dfn> = 학습이 부족해 분류를 제대로 못 하는 상태 / 좋은 모델 = 조금 틀려도 유연성이 있는 선 / 과적합 = 학습 데이터는 완벽히 나누지만 일반적이지 않은 선</li>
+<li data-k="m">과적합의 원인: <b>층이 너무 많거나</b>, 변수가 복잡하거나(노드가 너무 많음), <b>학습셋과 테스트셋이 중복</b>될 때</li>
+<li data-k="e">98%와 100%는 2% 차이지만, 그 2%에 지금까지 쓴 비용 이상이 들 수 있음</li>
+</ul>
+<p class="said"><span>강의 6:10</span>“과적합이라는 것은 모델이 학습 데이터셋 안에서는 일정 수준 이상의 예측과 정확도를 보이지만 새로운 데이터에 적용하면 잘 맞지 않는다” · <span>8:31</span>“과적합이란 문제에 빠지지 않도록 늘 주의해야 된다”</p>
+</div>
+<div class="card">
+<h3>학습셋과 테스트셋 나누기</h3>
+<ul>
+<li data-k="m" data-term>과적합을 막는 가장 간단한 방법 = <dfn>학습셋</dfn>(공부용)과 <dfn>테스트셋</dfn>(시험용)을 <b>분리</b>. 보통 <b>7 : 3</b>(또는 8 : 2, 85 : 15), 랜덤으로 나눔 → <a href="#calc8">풀이 ⑧</a></li>
+<li data-k="e">학습셋 70개로 공부해 모델을 만들고, 나머지 30개로 정확도 확인 (교과서만 보는 게 아니라 기출 문제로 확인) → 가장 나은 모델을 실생활에 적용 = 머신러닝 개발 순서</li>
+<li data-k="e">앞 장 예제(폐암, 피마, 아이리스)는 나누지 않고 전체로 테스트 → 새 데이터에서 성능은 알 수 없음. <b>머신러닝의 최종 목적 = 새로운 데이터</b>에서 좋은 결과</li>
+<li data-k="e"><code>train_test_split(X, y, test_size=0.3, shuffle=True)</code> (사이킷런) = 테스트 30%, 섞어서 나눔 / <code>model.evaluate(X_test, y_test)</code> = <b>loss와 accuracy</b> 두 값을 반환 → 광물 데이터 테스트 정확도 약 <b>84%</b></li>
+</ul>
+<pre class="code"><code>from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, shuffle=True)
+history = model.fit(X_train, y_train, epochs=200, batch_size=10)
+score = model.evaluate(X_test, y_test)                 # [loss, accuracy]
+print('Test accuracy:', score[1])</code></pre>
+</div>
+<div class="card">
+<h3>과적합 그래프: 학습셋 오차 vs 테스트셋 오차</h3>
+<ul>
+<li data-k="m">학습을 계속하면 <b>학습셋 오차는 계속 줄지만</b>, 테스트셋 오차는 줄다가 <b>어느 순간 다시 커짐</b> → 그 지점부터 <b>과적합</b>, 더 학습할 이유가 없음</li>
+<li data-k="e">논문 표(광물 데이터): 은닉을 늘릴수록 학습셋 정확도는 올라가 24개에서 <b>100%</b>, 하지만 테스트셋은 <b>12개일 때 90.4%</b>로 최고였다가 24개에서 <b>89.2%</b>로 떨어짐 (역전)</li>
+<li data-k="e">식이 복잡해지고 학습량이 늘면 학습셋 예측률은 계속 오르지만, 적절히 조절하지 않으면 테스트셋 예측률은 오히려 떨어짐</li>
+</ul>
+<p class="said"><span>강의 12:25</span>“어느 순간 줄어들다가 에러가 다시 높아지는 모습을 보이죠. 요게 지금 뭐다? 과적합이 발생했다”</p>
+<figure class="fig">{% include ml/fig/overfit.svg %}<figcaption>학습셋 오차(파랑)는 계속 줄고, 검증·테스트셋 오차(빨강)는 줄다가 다시 커짐</figcaption></figure>
+</div>
+<div class="card">
+<h3>모델 성능을 높이는 방법</h3>
+<ul>
+<li data-k="e">목표 = 학습셋에서만이 아니라 <b>새 데이터에서 안정적으로 높은 정확도</b>. 방법: 데이터의 <b>양</b>을 늘리고 <b>질</b>을 높이고 <b>전처리</b> + 최적의 <b>알고리즘</b> 선택</li>
+<li data-k="e" data-term><dfn>데이터 증강</dfn> = 데이터를 인위적으로 늘리는 방법. 이미지: 확대·축소, 회전 등으로 한 장에서 여러 샘플 / 테이블 데이터: 너무 튀는 값은 평균으로 바꾸거나 잘라냄, 시그모이드 등으로 0 ~ 1 사이 값으로</li>
+<li data-k="e">알고리즘: 은닉층 개수·노드 수·활성화 함수·옵티마이저를 바꿔 가며 최적 구조를 찾음. <b>딥러닝 설정에 정답은 없음</b></li>
+<li data-k="e">데이터에 따라 딥러닝이 아닌 <b>랜덤 포레스트, XG부스트, SVM</b>이 더 좋을 때도 있음 → 목적에 맞는 도구 선택</li>
+</ul>
+</div>
+<div class="card">
+<h3>K겹 교차 검증</h3>
+<ul>
+<li data-k="e">7 : 3으로 나누면 <b>테스트셋 30%는 학습에 쓸 수 없다</b>는 단점. 데이터를 모으기 어렵거나 비용이 큰 경우가 많음 (큰 IT 회사가 좋은 AI를 만드는 이유 = 데이터)</li>
+<li data-k="m" data-term><dfn>K겹 교차 검증</dfn> = 데이터를 <b>k개로 나눠 하나씩 테스트셋</b>으로 쓰고 나머지를 모두 학습셋으로 써서 k번 반복 → 정확도의 <b>평균</b>을 냄. 모든 데이터를 학습과 테스트에 쓰므로 <b>더 신뢰성 있는</b> 정확도</li>
+<li data-k="e">사이킷런 <code>KFold(n_splits=5, shuffle=True)</code>. 강의 예: 5번 정확도 74%, 81%, 88%, 90%, 73% → 평균 약 81% → <a href="#calc9">풀이 ⑨</a></li>
+</ul>
+<p class="said"><span>강의 24:35</span>“K 교차 검증이라는 걸 통해서 … 테스트에 사용된다고 버려지는 데이터를 모두 활용해서 평균을 내 가지고 정확도를 산출하기 때문에 보다 신뢰성 있는 신경 모델 정확도를 알 수가 있더라”</p>
+<figure class="fig">{% include ml/fig/split.svg %}<figcaption>학습 · 검증 · 테스트셋 나누기(14장)와 5겹 교차 검증</figcaption></figure>
+</div>
+<p class="skip"><b>몰라도 되는 것</b> <b>모델 저장과 재사용</b>(<code>model.save</code>, <code>load_model</code>, HDF5·.keras 확장자 → “크게 중요한 부분은 아닌데”), KFold 반복문 코드 세부</p>
+</section>
+
+<section id="s14">
+<h2>14장. 모델 성능 향상시키기 (와인)</h2>
+<p class="scope"><span>강의 핵심</span>검증셋 · 에포크와 과적합 · 검증셋 오차가 커지기 직전이 최적 → 자동 중단(“얼리스톱은 가볍게”)</p>
+<div class="card">
+<h3>와인 데이터</h3>
+<ul>
+<li data-k="e"><b>6,497개</b> 샘플, 속성 <b>12개</b> + 클래스 1개(레드 와인 1 / 화이트 와인 0) = 13열 → 이진 분류: 출력 시그모이드 + <code>binary_crossentropy</code></li>
+<li data-k="x"><code>X = df.iloc[:, 0:12]</code>, <code>y = df.iloc[:, 12]</code></li>
+</ul>
+</div>
+<div class="card">
+<h3>검증셋</h3>
+<ul>
+<li data-k="m" data-term><dfn>테스트셋</dfn>의 목적 = 학습이 <b>끝난 모델을 테스트</b> / <dfn>검증셋</dfn>의 목적 = <b>최적의 학습 파라미터</b>(에포크, 배치 사이즈 등)를 찾는 것. 검증 결과를 추적하며 최적 모델을 만듦</li>
+<li data-k="e"><code>train_test_split(test_size=0.2)</code>로 테스트 20%를 떼고, <code>fit(..., validation_split=0.25)</code>로 남은 80%의 25% = 전체의 20%를 검증셋으로 → <b>학습 : 검증 : 테스트 = 6 : 2 : 2</b>(통상 많이 쓰는 비율) → <a href="#calc8">풀이 ⑧</a></li>
+<li data-k="e">구조: 입력 12 → 30 → 12 → 8 → 출력 1. 에포크 50 → 테스트 정확도 약 <b>94%</b></li>
+<li data-k="x">출력에 <code>val_loss</code>, <code>val_accuracy</code>(검증셋의 오차·정확도)가 추가로 나옴</li>
+</ul>
+<pre class="code"><code>X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, shuffle=True)
+history = model.fit(X_train, y_train, epochs=50, batch_size=500,
+                    validation_split=0.25)              # 학습셋의 25%를 검증셋으로
+score = model.evaluate(X_test, y_test)</code></pre>
+<p class="said"><span>강의 3:02</span>“학습이 끝난 모델을 테스트해 보는 것이 테스트의 목적이라면 최적의 학습 파라미터 … 를 찾기 위한 것이 검증셋이고요” · <span>3:43</span>“6대 2대 2 정도 비율이 통상적으로 많이 사용되는 비율”</p>
+</div>
+<div class="card">
+<h3>에포크와 과적합, 최적의 학습 횟수</h3>
+<ul>
+<li data-k="m">학습을 많이 반복한다고 성능이 계속 좋아지지 않음: 에포크가 늘면 학습셋 정확도는 오르지만 실사용(새 데이터)에서는 떨어질 수 있음. 반복이 <b>너무 적으면 패턴을 충분히 파악하지 못하고</b>, <b>너무 많으면 과적합</b></li>
+<li data-k="e">에포크 50 = 순전파와 역전파를 50번 실시. 50번 중 40번째가 최적이었다면? → 에포크마다 정확도를 기록·저장하는 방법이 필요</li>
+<li data-k="e">그래프: <b>학습셋 오차(파랑)는 계속 줄고</b>, <b>검증셋 오차(빨강)는 줄다가 어느 시점부터 다시 상승</b> → 과적합</li>
+<li data-k="m"><b>검증셋 오차가 커지기 직전까지 학습한 모델</b>이 최적의 횟수로 학습한 모델</li>
+</ul>
+<p class="said"><span>강의 9:51</span>“검증셋 오차가 커지기 직전까지 학습한 모델이 최적의 횟수로 학습한 모델이라는 것이다”</p>
+</div>
+<div class="card">
+<h3>모델 업데이트와 자동 중단 (가볍게)</h3>
+<ul>
+<li data-k="e" data-term><dfn>체크포인트</dfn>(<code>ModelCheckpoint</code>) = 에포크마다 모델과 정확도를 파일로 저장하는 콜백 / <dfn>조기 중단</dfn>(<code>EarlyStopping</code>) = 검증셋 오차가 일정 횟수(<code>patience</code>) 동안 나아지지 않으면 <b>학습을 자동으로 멈춤</b></li>
+<li data-k="e">강의 예: <code>patience=20</code> → 검증셋 오차가 20번 이상 개선되지 않으면 종료. 에포크를 1,000번으로 잡았지만 약 <b>394번째</b>에서 멈춤 → 테스트 정확도 약 94% → <b>약 99%</b>로 향상 (데이터 양·질이 충분해서 가능한 극적인 경우)</li>
+<li data-k="x">학습 결과 <code>history.history</code>에 <code>loss</code>, <code>accuracy</code>, <code>val_loss</code>, <code>val_accuracy</code>가 에포크별로 저장됨</li>
+</ul>
+<pre class="code"><code>early_stopping_callback = EarlyStopping(monitor='val_loss', patience=20)
+checkpointer = ModelCheckpoint(filepath=modelpath, monitor='val_loss', save_best_only=True)
+history = model.fit(X_train, y_train, epochs=1000, batch_size=500, validation_split=0.25,
+                    callbacks=[early_stopping_callback, checkpointer])</code></pre>
+<p class="said"><span>강의 0:42</span>“얼리스톱 함수가 존재하는데 요 부분은 뭐 기본적인 사용 모듈 활용만 하시면 되기 때문에 어 가볍게 살펴보고 넘어가도록 하겠습니다”</p>
+</div>
+<p class="skip"><b>몰라도 되는 것</b> 체크포인트 파일 이름 형식, 에포크 2,000번 그래프 그리는 코드(“관련된 내용이니까 생략”), 콜백 인자 세부</p>
+</section>
+
+<section id="s15">
+<h2>15장. 실제 데이터로 만들어 보는 모델 (집값 예측)</h2>
+<p class="scope"><span>강의 핵심</span>“중요한 것은 결측치라는 것은 무엇이고 이상치라는 것은 무엇이다 … isnull이나 fillna 같은 함수를 이용해서 … 처리를 판단할 수 있다는 것”</p>
+<div class="card">
+<h3>분류가 아니라 수치 예측</h3>
+<ul>
+<li data-k="e">지금까지는 참/거짓, 여러 개 중 하나를 맞히는 <b>분류</b> → 이번에는 <b>수치(집값)를 예측</b></li>
+<li data-k="e">미국 아이오와주 에임스 지역 2006 ~ 2010년 실제 부동산 판매 기록: <b>1,460개</b> 샘플, 속성 <b>80개</b>, 마지막 열 = 집값(SalePrice)</li>
+<li data-k="e">사람이 오래 기록해 <b>빠진 값(결측치)</b>, 범위에서 너무 벗어난 값(<b>이상치</b>), 집값과 관계없는 정보가 섞여 있음 → 전처리가 필요</li>
+<li data-k="e"><code>df.dtypes</code>로 보면 정수(int64) · 실수(float64)는 그대로 학습에 쓸 수 있지만, <b>object(문자)</b>는 숫자로 바꿔야 함 → 원-핫 인코딩</li>
+</ul>
+</div>
+<div class="card">
+<h3>결측치 확인과 처리</h3>
+<ul>
+<li data-k="m" data-term><dfn>결측치</dfn> = 측정값이 없는(빠진) 값 / <dfn>이상치</dfn> = 정상 범위에서 너무 벗어난 값</li>
+<li data-k="m"><code>df.isnull().sum().sort_values(ascending=False).head(20)</code> = 열마다 결측치 개수를 세어 <b>많은 순(내림차순)</b>으로 20개 보기 → PoolQC는 1,460개 중 <b>1,453개</b>가 비어 있음 (의미 없는 데이터)</li>
+<li data-k="m"><code>pd.get_dummies(df)</code> = object 열을 원-핫 인코딩 → 열이 80개에서 약 <b>290개</b>로 늘어남</li>
+<li data-k="m"><code>df.fillna(df.mean())</code> = 결측치를 <b>평균값</b>으로 채움 / <code>fillna(0)</code> = 특정 값(0)으로 채움 / <code>dropna()</code> = 결측치가 있으면 삭제</li>
+<li data-k="e"><code>dropna(how='any')</code> = <b>하나라도</b> 결측치가 있으면 삭제 / <code>dropna(how='all')</code> = <b>모든 값이</b> 결측치일 때만 삭제</li>
+<li data-k="e">정답은 없음: 교수님은 90% 이상 비어 있는 열은 통째로 빼고, 100개 중 1개만 빠진 정도면 평균으로 채우는 쪽을 선호</li>
+</ul>
+<pre class="code"><code>df.isnull().sum().sort_values(ascending=False).head(20)   # 결측치 많은 열 20개
+df = pd.get_dummies(df)                                    # 문자 → 원-핫 인코딩
+df = df.fillna(df.mean())                                  # 결측치 → 평균값</code></pre>
+<p class="said"><span>강의 11:02</span>“중요한 것은 뭐다? 결측치라는 것은 무엇이고 이상치라는 것은 무엇이다? 그리고 그런 데이터들이 발생했을 때 isnull이나 fillna 같은 함수를 이용해서 … 해당 데이터에 대한 처리를 판단할 수 있다라는 것이 중요하다”</p>
+</div>
+<div class="card">
+<h3>상관관계로 속성 고르기와 회귀 모델</h3>
+<ul>
+<li data-k="e"><code>df.corr()</code>로 상관도를 구해 집값(SalePrice)과 관련 높은 순으로 정렬 → 상위 10개 추출 → 그래프로 보니 모두 <b>양의 상관관계</b>(그 값이 오르면 집값도 오름)</li>
+<li data-k="e">상관도가 높은 속성(전반적 품질, 거실 면적, 차고 등)만 골라 학습 → 여러 속성으로 하나의 값을 예측 = <b>다중 선형 회귀</b>와 같은 형태</li>
+<li data-k="m">수치 예측이라 출력층에 활성화 함수 없이 값 그대로, 손실 함수 = <b>평균 제곱 오차</b>(<code>mean_squared_error</code>), 옵티마이저 = 아담</li>
+<li data-k="e"><code>input_dim=X_train.shape[1]</code> = 숫자를 직접 쓰지 않고 데이터의 열 개수를 넣음. 조기 중단으로 과적합 방지 (에포크 2,000 → 약 140번째에서 멈춤)</li>
+<li data-k="e">예측값 그래프와 실제값 그래프가 <b>비슷하게 움직이면 잘 학습된 것</b> (실행할 때마다, 고른 속성·모델에 따라 조금씩 달라짐)</li>
+</ul>
+<pre class="code"><code>model = Sequential()
+model.add(Dense(10, input_dim=X_train.shape[1], activation='relu'))
+model.add(Dense(30, activation='relu'))
+model.add(Dense(40, activation='relu'))
+model.add(Dense(1))                                    # 활성화 함수 없음 = 숫자 그대로
+model.compile(optimizer='adam', loss='mean_squared_error')</code></pre>
+<p class="note">교재 코드는 집값과 상관도가 높은 속성 5개(+ 집값 1개 = 6열)를 씀 → 가중치 1,671개 → <a href="#calc4">풀이 ④</a></p>
+</div>
+<p class="skip"><b>몰라도 되는 것</b> 80개 속성 각각의 뜻, 그래프 그리는 코드, 학습이 멈추는 에포크 번호(실행할 때마다 다름)</p>
+</section>
+
+<section id="s16">
+<h2>16장. 이미지 인식의 꽃, 컨볼루션 신경망(CNN)</h2>
+<p class="scope"><span>강의 핵심</span>“제가 강조하고 싶은 거는 맥스풀링, 드롭아웃, 플래튼. 특히 드롭아웃” · “풀링이 뭔지 커널 필터가 뭔지 플래튼이 뭐 하는 건지만 아시면 될 거 같아요”</p>
+<div class="card">
+<h3>MNIST 손글씨 데이터</h3>
+<ul>
+<li data-k="e" data-term><dfn>CNN</dfn>(컨볼루션 신경망, 합성곱 신경망) = 이미지·영상 같은 멀티미디어 데이터를 빠르게 학습하려고 만든 신경망. 테슬라 같은 카메라 기반 <b>객체 탐지</b>의 근간</li>
+<li data-k="e">사람은 504192를 쉽게 읽지만, 컴퓨터가 5와 9와 6의 특징을 스스로 파악하게 하는 것은 오랜 과제</li>
+<li data-k="e"><dfn>MNIST</dfn> = 미국 국립표준기술원의 손글씨 숫자(0 ~ 9) 데이터. <b>7만 개 = 학습 6만 + 테스트 1만</b> (이미 나뉘어 있어 <code>train_test_split</code> 필요 없음)</li>
+<li data-k="e">이미지 한 장 = <b>28 × 28 = 784픽셀</b>, 픽셀마다 밝기 0 ~ 255 → 속성 784개 + 클래스 1개(0 ~ 9), 클래스 10개 중 하나를 맞히는 다중 분류</li>
+</ul>
+</div>
+<div class="card">
+<h3>데이터 전처리: 1차원 변환 · 정규화 · 원-핫</h3>
+<ul>
+<li data-k="e"><code>reshape</code>로 28 × 28 2차원 배열을 <b>784개짜리 1차원 배열</b>로 바꿈</li>
+<li data-k="e" data-term><dfn>정규화</dfn>(노멀라이제이션) = 데이터의 폭이 클 때 적절한 범위로 바꾸는 것. 케라스는 <b>0 ~ 1 사이 값</b>일 때 최적 → 0 ~ 255를 <b>255로 나눔</b> (먼저 정수 → 실수 <code>astype('float32')</code>로 형 변환) → <a href="#calc12">풀이 ⑫</a></li>
+<li data-k="e">클래스(0 ~ 9)는 <code>to_categorical(y, 10)</code>으로 원-핫 인코딩</li>
+<li data-k="e">기본 딥러닝(입력 784 → 은닉 512 → 소프트맥스 10) → 정확도 약 <b>98.16%</b></li>
+</ul>
+<pre class="code"><code>(X_train, y_train), (X_test, y_test) = mnist.load_data()       # 6만 / 1만
+X_train = X_train.reshape(X_train.shape[0], 784).astype('float32') / 255
+y_train = to_categorical(y_train, 10)                            # 원-핫 인코딩</code></pre>
+</div>
+<div class="card">
+<h3>컨볼루션 층: 커널(필터)과 특징 맵</h3>
+<ul>
+<li data-k="m" data-term><dfn>커널</dfn>(필터) = 입력 데이터 위를 한 칸씩 움직이며 곱하고 더해서 <b>특징을 추출</b>하는 작은 행렬 / <dfn>특징 맵</dfn>(피처 맵) = 커널을 적용해 얻은 결과 (컨볼루션 층 = 특징 맵, 같은 의미)</li>
+<li data-k="m">커널을 적용하면 데이터가 줄어듦: 4 × 4 입력 + 2 × 2 커널 → <b>3 × 3</b> 특징 맵 → <a href="#calc10">풀이 ⑩</a></li>
+<li data-k="x">크기를 그대로 유지하고 싶으면 가장자리에 여백을 줌(패딩)</li>
+<li data-k="e"><code>Conv2D(32, kernel_size=(3, 3), input_shape=(28, 28, 1), activation='relu')</code> = 커널 32개, 크기 3 × 3, 입력 28 × 28 × <b>채널</b>(1 = 흑백, 3 = 컬러)</li>
+</ul>
+<figure class="fig">{% include ml/fig/cnn.svg %}<figcaption>커널을 적용해 특징 맵을 만들고(왼쪽), 맥스 풀링으로 축소(오른쪽)</figcaption></figure>
+</div>
+<div class="card">
+<h3>맥스 풀링 · 드롭아웃 · 플래튼</h3>
+<ul>
+<li data-k="m" data-term><dfn>풀링</dfn>(서브 샘플링) = 컨볼루션 결과가 여전히 크고 복잡할 때 <b>한 번 더 축소</b>하는 것 / <dfn>맥스 풀링</dfn> = 영역에서 <b>가장 큰 값</b>만 남김 (주로 씀) / <dfn>평균 풀링</dfn> = 영역의 <b>평균값</b>을 남김 → <a href="#calc11">풀이 ⑪</a></li>
+<li data-k="e"><code>MaxPooling2D(pool_size=2)</code> → 가로·세로가 <b>절반</b> (4 × 4 → 2 × 2)</li>
+<li data-k="m" data-term><dfn>드롭아웃</dfn> = 노드나 층이 많으면 과적합이 생기므로, <b>은닉층의 노드 일부를 랜덤하게 꺼서</b> 과적합을 효과적으로 방지하는 기법. <code>Dropout(0.25)</code> = 노드의 <b>25%</b>를 끔 → <a href="#calc13">풀이 ⑬</a></li>
+<li data-k="m" data-term><dfn>플래튼</dfn>(Flatten) = 컨볼루션 층·맥스 풀링은 이미지를 <b>2차원 배열</b>로 다루므로, 이를 <b>1차원 배열로 펼쳐</b> 기본 층(<code>Dense</code>)에 넣을 수 있게 하는 함수</li>
+<li data-k="e">CNN 순서: 컨볼루션 → 컨볼루션 → 맥스 풀링 → 드롭아웃 → 플래튼 → Dense(128) → 드롭아웃 → 소프트맥스 10 → 정확도 약 <b>99.17%</b>, 학습도 더 빨리 끝남(23번째 에포크에서 중단)</li>
+</ul>
+<pre class="code"><code>model = Sequential()
+model.add(Conv2D(32, kernel_size=(3, 3), input_shape=(28, 28, 1), activation='relu'))
+model.add(Conv2D(64, (3, 3), activation='relu'))
+model.add(MaxPooling2D(pool_size=(2, 2)))      # 절반으로 축소
+model.add(Dropout(0.25))                       # 노드 25% 끔
+model.add(Flatten())                           # 2차원 → 1차원
+model.add(Dense(128, activation='relu'))
+model.add(Dropout(0.5))
+model.add(Dense(10, activation='softmax'))</code></pre>
+<p class="said"><span>강의 1:02</span>“제가 강조하고 싶은 거는 요 부분입니다. 맥스풀링, 드롭아웃, 플래튼. 특히 드롭아웃” · <span>16:07</span>“풀링이 뭔지 커널 필터가 뭔지 플래튼이 뭐 하는 건지만 아시면 될 거 같아요” · <span>18:06</span>“기말 시험 범위까지 포함된 내용이니까 참고하시길 바랍니다”</p>
+</div>
+<p class="skip"><b>몰라도 되는 것</b> CNN 그림·층별 세부(“그림은 많습니다만 굳이 신경 쓰지 않으셔도”), 다운 샘플링·업 샘플링(“참고만 하시고”), <code>to_categorical</code> 출력 확인(“무시해서 하셔도 괜찮습니다”), 코랩 GPU/TPU 설정</p>
+</section>
+
+<section id="calc">
+<h2>계산 문제 풀이</h2>
+<div class="card">
+<p>강의에서 숫자를 짚어 준 계산을 모았습니다. 시험에서는 숫자만 바꿔 나올 수 있으니 순서를 외우고 연습 문제를 직접 풀어 보세요. 숫자를 바꾼 문제는 <a href="{{ '/ml/quiz/#calc' | relative_url }}">문제 → 계산 문제 풀어보기</a>에서 적고 채점할 수 있습니다.</p>
+<div class="formula">층 하나의 가중치 개수 = 앞 층 노드 수 × 뒤 층 노드 수 + 뒤 층 노드 수(바이어스)</div>
+</div>
+<div class="card" id="calc1">
+<h3 data-k="e">풀이 ① 폐암 모델 가중치 개수 (10장)</h3>
+<p>구조: 입력 16 → 은닉 30 → 출력 1</p>
+<ol><li>입력 → 은닉: 16 × 30 = 480 + 바이어스 30 = <b>510</b></li><li>은닉 → 출력: 30 × 1 = 30 + 바이어스 1 = <b>31</b></li><li>합: 510 + 31 = <b>541개</b></li></ol>
+<p class="practice"><b>연습</b> 입력 10 → 은닉 20 → 출력 1 → (10 × 20 + 20) + (20 × 1 + 1) = 220 + 21 = 241</p>
+</div>
+<div class="card" id="calc2">
+<h3 data-k="e">풀이 ② 피마 인디언 모델 가중치 개수 (11장)</h3>
+<p>구조: 입력 8 → 은닉 12 → 은닉 8 → 출력 1</p>
+<ol><li>8 × 12 + 12 = <b>108</b></li><li>12 × 8 + 8 = <b>104</b></li><li>8 × 1 + 1 = <b>9</b></li><li>합: 108 + 104 + 9 = <b>221개</b> (강의: “학습에 사용되는 파라미터가 221개”)</li></ol>
+</div>
+<div class="card" id="calc3">
+<h3 data-k="e">풀이 ③ 아이리스 모델 가중치 개수 (12장)</h3>
+<p>구조: 입력 4 → 은닉 12 → 은닉 8 → 출력 3</p>
+<ol><li>4 × 12 + 12 = <b>60</b></li><li>12 × 8 + 8 = <b>104</b></li><li>8 × 3 + 3 = <b>27</b> (출력 노드가 3개라 바이어스도 3개)</li><li>합: 60 + 104 + 27 = <b>191개</b></li></ol>
+</div>
+<div class="card" id="calc4">
+<h3 data-k="x">풀이 ④ 집값 모델 가중치 개수 (15장)</h3>
+<p>구조: 입력 5 → 10 → 30 → 40 → 출력 1</p>
+<ol><li>5 × 10 + 10 = 60</li><li>10 × 30 + 30 = 330</li><li>30 × 40 + 40 = 1,240</li><li>40 × 1 + 1 = 41</li><li>합: <b>1,671개</b></li></ol>
+</div>
+<div class="card" id="calc5">
+<h3 data-k="e">풀이 ⑤ 기울기 소실: 시그모이드 미분값 곱하기 (9장)</h3>
+<p>시그모이드 미분의 최댓값 = 0.25. 층을 지날 때마다 곱해진다고 하면 (가장 좋은 경우)</p>
+<ol><li>1층: 0.25</li><li>2층: 0.25 × 0.25 = <b>0.0625</b></li><li>3층: 0.0625 × 0.25 = <b>0.015625</b> (약 1.6%)</li></ol>
+<p>렐루는 x &gt; 0이면 미분값 1 → 1 × 1 × 1 = 1 (그대로 전달)</p>
+</div>
+<div class="card" id="calc6">
+<h3 data-k="x">풀이 ⑥ 에포크와 배치 사이즈 (10장)</h3>
+<p>문제: 샘플 480개, <code>batch_size=16</code>, <code>epochs=5</code></p>
+<ol><li>한 에포크의 묶음 수 = 480 ÷ 16 = <b>30번</b> 가중치 업데이트</li><li>전체 = 30 × 5 = <b>150번</b></li></ol>
+<p>강의 예제(470개 ÷ 16 = 29.4)처럼 나누어떨어지지 않으면 마지막 묶음은 남은 개수만큼 → 30묶음</p>
+</div>
+<div class="card" id="calc7">
+<h3 data-k="e">풀이 ⑦ 소프트맥스 확률 (12장)</h3>
+<p>소프트맥스 출력은 <b>모두 더하면 1</b> → 세토사 0.1, 버지컬러 0.3이면 버지니카 = 1 − 0.1 − 0.3 = <b>0.6</b> → 가장 큰 버지니카로 예측</p>
+</div>
+<div class="card" id="calc8">
+<h3 data-k="e">풀이 ⑧ 데이터 나누기 (13 · 14장)</h3>
+<p><b>13장</b> 샘플 100개, <code>test_size=0.3</code> → 테스트 30개, 학습 70개</p>
+<p><b>14장</b> 샘플 1,000개</p>
+<ol><li><code>test_size=0.2</code> → 테스트 1,000 × 0.2 = <b>200개</b>, 남은 학습용 800개</li><li><code>validation_split=0.25</code> → 검증 800 × 0.25 = <b>200개</b></li><li>실제 학습 800 − 200 = <b>600개</b> → 6 : 2 : 2</li></ol>
+</div>
+<div class="card" id="calc9">
+<h3 data-k="e">풀이 ⑨ K겹 교차 검증 평균 (13장)</h3>
+<p>5겹 정확도: 74%, 81%, 88%, 90%, 73%</p>
+<ol><li>합: 74 + 81 + 88 + 90 + 73 = 406</li><li>평균: 406 ÷ 5 = <b>81.2%</b> (강의: “81% 정도”)</li></ol>
+</div>
+<div class="card" id="calc10">
+<h3 data-k="e">풀이 ⑩ 컨볼루션 결과 크기 (16장)</h3>
+<p>커널을 한 칸씩 옮길 때(여백 없음) 결과 한 변 = <b>입력 − 커널 + 1</b></p>
+<ol><li>4 × 4 입력, 2 × 2 커널 → 4 − 2 + 1 = <b>3 × 3</b></li><li>28 × 28 입력, 3 × 3 커널 → 28 − 3 + 1 = <b>26 × 26</b></li><li>한 번 더 3 × 3 → 26 − 3 + 1 = <b>24 × 24</b>, 맥스 풀링(2) → <b>12 × 12</b></li></ol>
+<p>값 계산: 커널과 겹치는 칸끼리 곱해서 더함. 그림 예: 1×1 + 0×0 + 0×0 + 1×1 = <b>2</b></p>
+<p class="practice"><b>연습</b> 6 × 6 입력, 3 × 3 커널 → 4 × 4, 맥스 풀링(2) → 2 × 2</p>
+</div>
+<div class="card" id="calc11">
+<h3 data-k="e">풀이 ⑪ 맥스 풀링 값 (16장)</h3>
+<p>4 × 4 입력을 2 × 2 영역 4개로 나눠 각 영역의 <b>가장 큰 값</b></p>
+<div class="tbl"><table><tr><td>1</td><td>0</td><td>2</td><td>3</td></tr><tr><td>4</td><td>6</td><td>6</td><td>8</td></tr><tr><td>3</td><td>1</td><td>1</td><td>0</td></tr><tr><td>1</td><td>2</td><td>2</td><td>4</td></tr></table></div>
+<ol><li>왼쪽 위 {1, 0, 4, 6} → <b>6</b> · 오른쪽 위 {2, 3, 6, 8} → <b>8</b></li><li>왼쪽 아래 {3, 1, 1, 2} → <b>3</b> · 오른쪽 아래 {1, 0, 2, 4} → <b>4</b></li></ol>
+<p>평균 풀링이면: 왼쪽 위 (1 + 0 + 4 + 6) ÷ 4 = 2.75</p>
+</div>
+<div class="card" id="calc12">
+<h3 data-k="x">풀이 ⑫ 정규화 (16장)</h3>
+<p>픽셀값 ÷ 255 → 0 ~ 1: 255 → <b>1.0</b>, 0 → 0, 51 → 51 ÷ 255 = <b>0.2</b></p>
+<p>28 × 28 = <b>784</b>개 픽셀 → 1차원 배열 784개</p>
+</div>
+<div class="card" id="calc13">
+<h3 data-k="x">풀이 ⑬ 드롭아웃 (16장)</h3>
+<p>노드 512개에 <code>Dropout(0.25)</code> → 512 × 0.25 = <b>128개</b>를 끄고 384개로 학습 (매번 랜덤하게 다른 노드)</p>
+</div>
+</section>
+
+<section id="glossary" class="keep">
+<h2>용어 사전</h2>
+<div class="card">
+<p class="note">본문에서 정의한 용어를 장 순서대로 모았습니다. 장 이름을 누르면 본문 위치로 갑니다.</p>
+<dl class="gloss" id="gloss"></dl>
+</div>
+</section>
+
+<script src="{{ '/assets/js/lens.js' | relative_url }}"></script>
